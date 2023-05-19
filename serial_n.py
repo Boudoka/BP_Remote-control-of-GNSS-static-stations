@@ -143,29 +143,19 @@ class SerialNmeaRead(threading.Thread):
                     # open file as append-binary
                     with open(self.file_name, "ab") as f:
                         f.write(serial_data)
-                                          
-                              
+                                                                        
                 def endcycle():  # functions that runs at the end of one loop
                     print("zacina endcycle")
-                    #global i_DB
-                    #i_DB = 0
-                    #print(i_DB)
-                    
-               #     print("bezime")
                     if gga.lat_dir == "S":  # negative coordinates
                         lat = gga.lat * (-1)                                                                                           
-#                     lat = gga.lat
-#                     print(lat)
                     else:
                         lat = gga.lat
                         
                     DD = int(float(lat)/100)
                     SS = float(lat) - DD * 100 
                     lat = DD + SS/60
-#                     lat = round(lat,8)
                     lat = "{:.8f}".format(lat)
-
-                    
+                  
                     if gga.lon_dir == "W":
                         lon = gga.lon * (-1)
                     else:
@@ -174,11 +164,9 @@ class SerialNmeaRead(threading.Thread):
                     DD = int(float(lon)/100)
                     SS = float(lon) - DD * 100 
                     lon = DD + SS/60
-#                     lon = round(lon,8)
                     lon = "{:.9f}".format(lon)
                     
-                        # all values are %s because query is parameterized
-                    #print(lon)
+                    # all values are %s because query is parameterized
                     main_table = ("INSERT INTO GNSS_static_station_control (ID_station, time, lat, lon, GPS_quality, SV_in_use, lat_error, lon_error, HDOP, PDOP, VDOP)"
                                   "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)")
                     main_tuple = (id_station, None, lat, lon, gga.gps_qual, gga.num_sats, gst.data[5], gst.data[6], gsa.data[15], gsa.data[14], gsa.data[16],)
@@ -192,87 +180,41 @@ class SerialNmeaRead(threading.Thread):
                         print("konci endcycle")
                     except Exception as err:
                         print(err)
-#     
-#     
-                    
-           # for t in range(121):  # replace with timer, import time
-                #line = ser.readline()
-                #print("nas port")
-            
+           
                 line = serial_data                                                   
-                #print("bezi\n")                    
                 line = line.decode()                
-#                 print(line)
-                #line = line.decode(encoding= 'unicode_escape')
-                #line = line.decode('unicode_escape', 'ignore')
-                #print(line)
                 line = line[:-2]                
-#                     len(line) 
-                #print(len(line))
-                #if len(line) > 3:    
-#                     if line[0] == "$":
-                    #print(line[3:6])
-#                     if line[3:5] == "TXT":  # GNTXT
-#                 print(i)
-#                 print(line)
-                #print(i_DB)   # !!!!!!!!!!!!!!!!NIC TO NEVYPISE POKUD JE TENTO PRIKAZ PLATNY!!!!!!!!!!!!
-              #  print("jsemtady")
-                #ii_DB = i_DB
-                #print(ii_DB)
-                if line[3:6] == "GGA":  # GGA                       
-                        
-                   # print("GGA:",line, "IDDB",i_DB)
-                    #print("bude iDB")
-                    #print(i_DB)
-                    print("GGA:",line)
-                    
-                    #gga = pynmea2.parse(line)
-                    if i_DB == 1:  # second gga ends line in database and starts new one
-                       
+  
+                if line[3:6] == "GGA":  # GGA                                               
+                    print("GGA:",line)            
+                    if i_DB == 1:  # second gga ends line in database and starts new one                       
                         gga = pynmea2.parse(line)
-                     #   print(gga.lat)
                         i_DB = i_DB + 1
-                     #   print(i_DB) 
                     else:
                         gga = pynmea2.parse(line)
                         i_DB = i_DB + 1
-                   
                 elif line[3:6] == "GSA":  # GSA 
                     print(line)
                     gsa = pynmea2.parse(line)
-                   # print(gsa.data[15])
                 elif line[3:6] == "GST":  # GST
                     print(line)
                     gst = pynmea2.parse(line)
-                    #print(gst)
-                #elif line[4] == "L":  # GLL
-                #    print(line)
-                #    gll = pynmea2.parse(line)
                 elif line[3:6] == "ZDA":  # ZDA
                     print(line)
                     zda = pynmea2.parse(line)
-                   # print(zda)
-#                     else:pass
-                    #else:pass #print("ha")
-                
-                    
                 else:pass
-#                     #print("t=",t)
+
                 endcycle()
                 time.sleep(60)
-                #except Exception:
-                
-                #    logger.exception(f"Some error in data: {serial_data}")
-                
+                                
             except Exception:
               logger.exception(f"Some error in data: {serial_data}")
-              
-            # print("zkouska\n")
-
-
+            
     def stop(self):
         self._stop_event.set()
         self.serial_object.close()
 
     def stopped(self):
         return self._stop_event.is_set()
+
+    
